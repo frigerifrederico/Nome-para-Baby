@@ -119,7 +119,7 @@
       <div class="profile-card" onclick="selectProfile('Pai')" id="card-pai">
         <div class="icon">👨</div><div class="label">Pai</div>
       </div>
-      <div class="profile-card" onclick="selectProfile('Mãe')" id="card-mae">
+      <div class="profile-card" onclick="selectProfile('Mae')" id="card-mae">
         <div class="icon">👩</div><div class="label">Mãe</div>
       </div>
     </div>
@@ -362,7 +362,7 @@ function addCustomName() {
 function refreshExport() {
   const base = state.sex==='ambos' ? ALL_NAMES : ALL_NAMES.filter(n=>n.sexo===state.sex);
   const liked = base.filter(n=>state.votes[n.nome]==='like').map(n=>({ nome:n.nome, sexo:n.sexo, origem:n.origem, apelido:n.apelido, match:n.match }));
-  const data = { perfil: state.profile||'Não definido', timestamp: new Date().toISOString(), likes: liked };
+  const data = { perfil: (state.profile==='Mae'?'Mãe':state.profile)||'Não definido', timestamp: new Date().toISOString(), likes: liked };
   const el = document.getElementById('my-export-json');
   if(el) el.value = JSON.stringify(data);
 }
