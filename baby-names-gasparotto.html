@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Nome do Bebê Gasparotto Frigeri</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --pink: #F8B4CC; --pink-light: #FEF0F5; --pink-dark: #C2185B;
+    --blue: #90CAF9; --blue-light: #E3F2FD; --blue-dark: #1565C0;
+    --purple: #B39DDB; --purple-light: #EDE7F6; --purple-dark: #4527A0;
+    --gold: #FFD54F; --gold-light: #FFF8E1; --gold-dark: #F57F17;
+    --green-light: #E8F5E9; --green: #66BB6A; --green-dark: #2E7D32;
+    --gray: #F5F5F5; --gray-mid: #9E9E9E; --gray-dark: #424242;
+    --white: #FFFFFF; --text: #212121; --text-muted: #757575;
+    --radius: 16px; --radius-sm: 10px; --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #FFF9FB; color: var(--text); min-height: 100vh; }
+  .screen { display: none; min-height: 100vh; padding-bottom: 80px; }
+  .screen.active { display: block; }
+  .header { background: white; padding: 20px 20px 16px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #F0E6EE; }
+  .header h1 { font-size: 18px; font-weight: 700; color: var(--purple-dark); }
+  .header p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .progress-bar { height: 4px; background: #EDE7F6; border-radius: 2px; margin-top: 12px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--pink-dark), var(--purple-dark)); border-radius: 2px; transition: width 0.3s; }
+
+  .welcome { padding: 32px 24px; text-align: center; }
+  .welcome .baby-icon { font-size: 72px; margin-bottom: 20px; }
+  .welcome h2 { font-size: 26px; font-weight: 800; color: var(--purple-dark); margin-bottom: 8px; }
+  .welcome p { font-size: 15px; color: var(--text-muted); line-height: 1.6; margin-bottom: 32px; }
+
+  .profile-cards { display: flex; gap: 16px; margin-bottom: 28px; }
+  .profile-card { flex: 1; background: white; border: 2.5px solid #E0D6F0; border-radius: var(--radius); padding: 20px 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
+  .profile-card:active { transform: scale(0.97); }
+  .profile-card.selected { border-color: var(--purple-dark); background: var(--purple-light); }
+  .profile-card .icon { font-size: 36px; margin-bottom: 8px; }
+  .profile-card .label { font-size: 15px; font-weight: 700; color: var(--gray-dark); }
+
+  .sex-cards { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
+  .sex-card { flex: 1; min-width: 90px; background: white; border: 2.5px solid #E0D6F0; border-radius: var(--radius); padding: 16px 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
+  .sex-card.boy.selected { border-color: var(--blue-dark); background: var(--blue-light); }
+  .sex-card.girl.selected { border-color: var(--pink-dark); background: var(--pink-light); }
+  .sex-card.both.selected { border-color: var(--purple-dark); background: var(--purple-light); }
+  .sex-card .icon { font-size: 28px; margin-bottom: 6px; }
+  .sex-card .label { font-size: 13px; font-weight: 700; color: var(--gray-dark); }
+
+  .btn { display: block; width: 100%; padding: 16px; border: none; border-radius: var(--radius); font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: linear-gradient(135deg, #C2185B, #4527A0); color: white; }
+  .btn-secondary { background: white; color: var(--purple-dark); border: 2px solid var(--purple-dark); }
+  .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid #ddd; padding: 12px; font-size: 14px; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .loading-screen { text-align: center; padding: 60px 24px; }
+  .loading-screen .spinner { width: 48px; height: 48px; border: 4px solid #EDE7F6; border-top-color: var(--purple-dark); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-screen h3 { font-size: 18px; color: var(--purple-dark); margin-bottom: 8px; }
+  .loading-screen p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+
+  .filter-bar { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; background: white; border-bottom: 1px solid #F0E6EE; scrollbar-width: none; }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .filter-btn { white-space: nowrap; padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1.5px solid #ddd; background: white; cursor: pointer; color: var(--text-muted); }
+  .filter-btn.active { background: var(--purple-dark); color: white; border-color: var(--purple-dark); }
+
+  .names-list { padding: 12px 16px; }
+  .name-card { background: white; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); border-left: 4px solid transparent; }
+  .name-card.boy { border-left-color: var(--blue); }
+  .name-card.girl { border-left-color: var(--pink-dark); }
+  .name-card.liked { background: #F0FFF4; }
+  .name-card.disliked { opacity: 0.45; }
+  .name-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .name-main { flex: 1; }
+  .name-title { font-size: 20px; font-weight: 800; color: var(--text); }
+  .name-nickname { font-size: 13px; color: var(--purple-dark); font-weight: 600; margin-top: 2px; }
+  .name-origin { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 20px; margin-top: 5px; font-weight: 600; }
+  .origin-italiano { background: #FFF3E0; color: #E65100; }
+  .origin-brasileiro { background: #E8F5E9; color: #2E7D32; }
+  .origin-popular { background: #E3F2FD; color: #1565C0; }
+  .origin-internacional { background: #F3E5F5; color: #6A1B9A; }
+  .name-meaning { font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
+  .match-badge { text-align: center; min-width: 42px; }
+  .match-score { font-size: 18px; font-weight: 800; }
+  .match-label { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+  .score-high { color: #2E7D32; }
+  .score-mid { color: #F57F17; }
+  .score-low { color: #C62828; }
+  .match-hint { font-size: 12px; color: var(--text-muted); margin-top: 8px; font-style: italic; border-top: 1px solid #F5F5F5; padding-top: 8px; }
+  .vote-btns { display: flex; gap: 8px; margin-top: 12px; }
+  .vote-btn { flex: 1; padding: 12px; border: 2px solid; border-radius: var(--radius-sm); font-size: 22px; background: white; cursor: pointer; transition: all 0.15s; }
+  .vote-btn:active { transform: scale(0.95); }
+  .vote-like { border-color: var(--green); }
+  .vote-like.active { background: var(--green-light); border-color: var(--green-dark); }
+  .vote-dislike { border-color: #FFCDD2; }
+  .vote-dislike.active { background: #FFEBEE; border-color: #C62828; }
+
+  .sticky-footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px 16px; border-top: 1px solid #F0E6EE; z-index: 100; }
+
+  .compare-screen { padding: 24px 20px; }
+  .compare-screen h2 { font-size: 22px; font-weight: 800; color: var(--purple-dark); margin-bottom: 8px; }
+  .compare-screen p { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+  .export-box { background: var(--purple-light); border: 1.5px solid var(--purple); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+  .export-box h3 { font-size: 15px; font-weight: 700; color: var(--purple-dark); margin-bottom: 10px; }
+  textarea.json-area { width: 100%; height: 100px; border: 1px solid #ddd; border-radius: var(--radius-sm); padding: 10px; font-size: 12px; font-family: monospace; resize: vertical; color: var(--text); background: white; }
+
+  .match-results { margin-top: 24px; }
+  .match-section { margin-bottom: 24px; }
+  .match-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; padding: 8px 0; border-bottom: 2px solid; }
+  .match-perfect h3 { color: var(--green-dark); border-color: var(--green); }
+  .match-almost h3 { color: #E65100; border-color: var(--gold); }
+
+  .star-card { background: white; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); }
+  .star-card .name-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .star-card .name-row .name { font-size: 18px; font-weight: 800; }
+  .stars { display: flex; gap: 6px; justify-content: center; margin-top: 8px; }
+  .star { font-size: 28px; cursor: pointer; transition: transform 0.1s; opacity: 0.3; }
+  .star.active { opacity: 1; }
+  .star:active { transform: scale(1.2); }
+
+  .final-ranking { margin-top: 24px; }
+  .rank-item { display: flex; align-items: center; gap: 12px; background: white; border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 8px; box-shadow: var(--shadow); }
+  .rank-pos { font-size: 22px; font-weight: 800; color: var(--purple-dark); min-width: 32px; }
+  .rank-name { flex: 1; }
+  .rank-name .name { font-size: 17px; font-weight: 700; }
+  .rank-name .nick { font-size: 13px; color: var(--purple-dark); }
+  .rank-stars { font-size: 14px; color: var(--gold-dark); font-weight: 600; }
+  .rank-pos.gold { color: #F57F17; }
+  .rank-pos.silver { color: #757575; }
+  .rank-pos.bronze { color: #8D6E63; }
+
+  .add-name-form { background: white; border-radius: var(--radius); padding: 16px; margin: 0 16px 16px; box-shadow: var(--shadow); }
+  .add-name-form h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--purple-dark); }
+  .input-row { display: flex; gap: 8px; }
+  .input-row input { flex: 1; padding: 10px 14px; border: 1.5px solid #ddd; border-radius: var(--radius-sm); font-size: 15px; }
+  .input-row select { padding: 10px; border: 1.5px solid #ddd; border-radius: var(--radius-sm); font-size: 14px; background: white; }
+  .input-row button { padding: 10px 16px; background: var(--purple-dark); color: white; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; cursor: pointer; }
+
+  .nav-tabs { display: flex; background: white; border-bottom: 1px solid #F0E6EE; }
+  .nav-tab { flex: 1; padding: 14px 8px; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-muted); border-bottom: 3px solid transparent; cursor: pointer; }
+  .nav-tab.active { color: var(--purple-dark); border-bottom-color: var(--purple-dark); }
+
+  .empty-state { text-align: center; padding: 40px 24px; color: var(--text-muted); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .tag-sexo { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; display: inline-block; margin-left: 6px; vertical-align: middle; }
+  .tag-menino { background: var(--blue-light); color: var(--blue-dark); }
+  .tag-menina { background: var(--pink-light); color: var(--pink-dark); }
+
+  .section-label { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-muted); text-transform: uppercase; margin: 0 16px 8px; }
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: WELCOME -->
+<div id="screen-welcome" class="screen active">
+  <div class="welcome">
+    <div class="baby-icon">👶</div>
+    <h2>Bebê Gasparotto Frigeri</h2>
+    <p>Escolham juntos o nome perfeito para o(a) bebê. Cada um avalia os nomes separadamente e depois comparam os resultados!</p>
+
+    <p style="font-size: 14px; font-weight: 700; color: var(--gray-dark); margin-bottom: 12px; text-align: left;">Quem está avaliando?</p>
+    <div class="profile-cards">
+      <div class="profile-card" onclick="selectProfile('Pai')" id="card-pai">
+        <div class="icon">👨</div>
+        <div class="label">Pai</div>
+      </div>
+      <div class="profile-card" onclick="selectProfile('Mãe')" id="card-mae">
+        <div class="icon">👩</div>
+        <div class="label">Mãe</div>
+      </div>
+    </div>
+
+    <p style="font-size: 14px; font-weight: 700; color: var(--gray-dark); margin-bottom: 12px; text-align: left;">Quais nomes ver?</p>
+    <div class="sex-cards">
+      <div class="sex-card boy" onclick="selectSex('menino')" id="card-menino">
+        <div class="icon">💙</div>
+        <div class="label">Menino</div>
+      </div>
+      <div class="sex-card girl" onclick="selectSex('menina')" id="card-menina">
+        <div class="icon">💗</div>
+        <div class="label">Menina</div>
+      </div>
+      <div class="sex-card both" onclick="selectSex('ambos')" id="card-ambos">
+        <div class="icon">✨</div>
+        <div class="label">Ambos</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="btn-start" onclick="startApp()" disabled>Começar a avaliar ➜</button>
+    <br>
+    <button class="btn btn-outline" onclick="showScreen('screen-compare')" style="margin-top:8px">📊 Comparar resultados</button>
+  </div>
+</div>
+
+<!-- SCREEN 2: LOADING -->
+<div id="screen-loading" class="screen">
+  <div class="loading-screen">
+    <div class="spinner"></div>
+    <h3>Gerando nomes com IA...</h3>
+    <p>Estamos criando uma lista personalizada de nomes italianos, brasileiros e populares, com análise de harmonia com <strong>Gasparotto Frigeri</strong>.</p>
+    <p style="margin-top: 12px; font-size: 13px;">Isso pode levar alguns segundos ⏳</p>
+  </div>
+</div>
+
+<!-- SCREEN 3: NAMES LIST -->
+<div id="screen-names" class="screen">
+  <div class="header">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <div>
+        <h1 id="header-profile">Avaliação do Pai</h1>
+        <p id="header-progress">0 avaliados</p>
+      </div>
+      <button onclick="showScreen('screen-welcome')" style="background:none;border:none;font-size:22px;cursor:pointer;">🏠</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" onclick="applyFilter('todos')">Todos</button>
+    <button class="filter-btn" onclick="applyFilter('menino')">💙 Menino</button>
+    <button class="filter-btn" onclick="applyFilter('menina')">💗 Menina</button>
+    <button class="filter-btn" onclick="applyFilter('italiano')">🇮🇹 Italiano</button>
+    <button class="filter-btn" onclick="applyFilter('brasileiro')">🇧🇷 Brasileiro</button>
+    <button class="filter-btn" onclick="applyFilter('popular')">⭐ Popular</button>
+    <button class="filter-btn" onclick="applyFilter('liked')">👍 Curtidos</button>
+    <button class="filter-btn" onclick="applyFilter('pending')">⏳ Pendentes</button>
+  </div>
+
+  <div class="add-name-form">
+    <h3>➕ Adicionar nome</h3>
+    <div class="input-row">
+      <input type="text" id="custom-name-input" placeholder="Nome personalizado" />
+      <select id="custom-sex-select"><option value="menino">Menino</option><option value="menina">Menina</option></select>
+      <button onclick="addCustomName()">OK</button>
+    </div>
+  </div>
+
+  <div class="names-list" id="names-list"></div>
+
+  <div class="sticky-footer">
+    <button class="btn btn-primary" onclick="showScreen('screen-compare')">📊 Ver resultados e comparar</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: COMPARE -->
+<div id="screen-compare" class="screen">
+  <div class="header">
+    <h1>Comparar Resultados</h1>
+    <p>Cole o JSON do outro para encontrar os matches</p>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="nav-tab active" id="tab-export" onclick="switchTab('export')">📤 Exportar</div>
+    <div class="nav-tab" id="tab-compare" onclick="switchTab('compare')">🔍 Comparar</div>
+    <div class="nav-tab" id="tab-ranking" onclick="switchTab('ranking')">🏆 Ranking</div>
+  </div>
+
+  <div id="tab-content-export" style="padding: 20px 16px;">
+    <h3 style="font-size:16px; font-weight:700; color:var(--purple-dark); margin-bottom:8px;">Seus likes</h3>
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Copie o JSON abaixo e envie para o(a) parceiro(a).</p>
+    <div class="export-box">
+      <h3>Copiar meu resultado</h3>
+      <textarea class="json-area" id="my-export-json" readonly></textarea>
+      <button class="btn btn-primary" style="margin-top:10px" onclick="copyJSON()">📋 Copiar JSON</button>
+    </div>
+    <p style="font-size:12px; color:var(--text-muted); text-align:center; margin-top:8px;">Compartilhe via WhatsApp, notas ou e-mail</p>
+  </div>
+
+  <div id="tab-content-compare" style="display:none; padding: 20px 16px;">
+    <h3 style="font-size:16px; font-weight:700; color:var(--purple-dark); margin-bottom:8px;">Colar JSON do parceiro(a)</h3>
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Cole aqui o JSON que seu parceiro(a) enviou.</p>
+    <textarea class="json-area" id="partner-json" placeholder="Cole o JSON aqui..." style="height:120px"></textarea>
+    <button class="btn btn-primary" style="margin-top:12px" onclick="compareResults()">🔍 Encontrar matches!</button>
+    <div id="match-results" class="match-results"></div>
+  </div>
+
+  <div id="tab-content-ranking" style="display:none; padding: 20px 16px;">
+    <h3 style="font-size:16px; font-weight:700; color:var(--purple-dark); margin-bottom:8px;">Ranking Final</h3>
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Dê estrelas aos nomes que ambos curtiram para criar o ranking definitivo.</p>
+    <div id="ranking-content"></div>
+  </div>
+
+  <div style="padding: 0 16px 16px; margin-top: 8px;">
+    <button class="btn btn-outline" onclick="showScreen('screen-welcome')">⬅ Voltar ao início</button>
+  </div>
+</div>
+
+<script>
+const EXCLUDED = ['frederico','marina','enrico','silvia','josé','daniela','washington','tom','larissa','andré','talita','rafael','theo','ana','beatriz','bia','jose','andre'];
+
+let state = {
+  profile: null,
+  sex: null,
+  names: [],
+  votes: {},
+  stars: {},
+  currentFilter: 'todos'
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('babynames_state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      state.votes = parsed.votes || {};
+      state.stars = parsed.stars || {};
+      state.names = parsed.names || [];
+    }
+  } catch(e) {}
+}
+
+function saveState() {
+  localStorage.setItem('babynames_state', JSON.stringify({ votes: state.votes, stars: state.stars, names: state.names }));
+}
+
+function selectProfile(p) {
+  state.profile = p;
+  document.getElementById('card-pai').classList.toggle('selected', p === 'Pai');
+  document.getElementById('card-mae').classList.toggle('selected', p === 'Mãe');
+  checkStart();
+}
+
+function selectSex(s) {
+  state.sex = s;
+  ['menino','menina','ambos'].forEach(x => document.getElementById('card-'+x).classList.toggle('selected', x === s));
+  checkStart();
+}
+
+function checkStart() {
+  document.getElementById('btn-start').disabled = !(state.profile && state.sex);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if (id === 'screen-compare') refreshExport();
+}
+
+async function startApp() {
+  showScreen('screen-loading');
+  loadState();
+  if (state.names.length === 0) {
+    await generateNames();
+  }
+  renderNames();
+  showScreen('screen-names');
+}
+
+async function generateNames() {
+  const sexPrompt = state.sex === 'ambos' ? '100 nomes masculinos e 100 nomes femininos (total 200)' : `200 nomes ${state.sex === 'menino' ? 'masculinos' : 'femininos'}`;
+
+  const prompt = `Você é um especialista em nomes brasileiros e italianos. Gere ${sexPrompt} para um bebê com sobrenome "Gasparotto Frigeri".
+
+REGRAS:
+- Inclua nomes de origem italiana, brasileira e os mais populares no Brasil atualmente
+- NÃO inclua: frederico, marina, enrico, silvia, jose, daniela, washington, tom, larissa, andre, talita, rafael, theo, ana, beatriz, bia
+- Para cada nome calcule um "match_sobrenome" de 1 a 10 (harmonia fonética e cultural com Gasparotto Frigeri)
+- Aponte o apelido mais provável
+- Seja diverso: diferentes origens, comprimentos e estilos
+
+Retorne APENAS um JSON válido sem markdown, sem texto adicional, no formato:
+{"nomes": [{"nome": "...", "sexo": "menino/menina", "origem": "italiano/brasileiro/popular/internacional", "significado": "...", "apelido": "...", "match": 8, "match_justificativa": "..."}]}`;
+
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 8000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content[0].text;
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    state.names = parsed.nomes.filter(n => !EXCLUDED.includes(n.nome.toLowerCase()));
+    saveState();
+  } catch(e) {
+    // Fallback with sample names if API fails
+    state.names = getFallbackNames();
+    saveState();
+  }
+}
+
+function getFallbackNames() {
+  return [
+    {nome:"Lorenzo",sexo:"menino",origem:"italiano",significado:"Natural de Lourenço, coroado de louros",apelido:"Lore / Renzo",match:10,match_justificativa:"Harmonia italiana perfeita com Gasparotto Frigeri"},
+    {nome:"Leonardo",sexo:"menino",origem:"italiano",significado:"Forte como um leão",apelido:"Leo / Léo",match:9,match_justificativa:"Sonoridade italiana clássica, flui bem com Gasparotto"},
+    {nome:"Matteo",sexo:"menino",origem:"italiano",significado:"Dom de Deus",apelido:"Matt / Mattinho",match:10,match_justificativa:"Sobrenome italiano + nome italiano = combinação perfeita"},
+    {nome:"Giovanni",sexo:"menino",origem:"italiano",significado:"Deus é gracioso",apelido:"Gio / Giova",match:9,match_justificativa:"Nome italiano clássico, combina culturalmente"},
+    {nome:"Luca",sexo:"menino",origem:"italiano",significado:"Luz, aquele que traz luz",apelido:"Luca",match:10,match_justificativa:"Curto, forte, italiano puro - perfeito com Gasparotto Frigeri"},
+    {nome:"Marco",sexo:"menino",origem:"italiano",significado:"Dedicado a Marte",apelido:"Marco",match:9,match_justificativa:"Clássico italiano, excelente harmonia"},
+    {nome:"Valentino",sexo:"menino",origem:"italiano",significado:"Forte e saudável",apelido:"Val / Tino",match:9,match_justificativa:"Sonoridade italiana fluida com o sobrenome"},
+    {nome:"Nicolas",sexo:"menino",origem:"internacional",significado:"Vitória do povo",apelido:"Nico",match:8,match_justificativa:"Popular, soa bem com Gasparotto"},
+    {nome:"Gabriel",sexo:"menino",origem:"brasileiro",significado:"Homem de Deus",apelido:"Gabi / Gab",match:7,match_justificativa:"Popular no Brasil, soa bem"},
+    {nome:"Miguel",sexo:"menino",origem:"brasileiro",significado:"Quem é como Deus",apelido:"Mig / Miguel",match:7,match_justificativa:"Um dos mais populares no Brasil"},
+    {nome:"Pedro",sexo:"menino",origem:"brasileiro",significado:"Pedra, rocha",apelido:"Pedrinho / Ped",match:7,match_justificativa:"Clássico brasileiro"},
+    {nome:"Gustavo",sexo:"menino",origem:"popular",significado:"Bastão dos godos",apelido:"Gus / Tavo",match:6,match_justificativa:"Popular, funciona bem"},
+    {nome:"Bernardo",sexo:"menino",origem:"popular",significado:"Urso corajoso",apelido:"Bê / Berna",match:8,match_justificativa:"Soa bem com Gasparotto Frigeri"},
+    {nome:"Eduardo",sexo:"menino",origem:"popular",significado:"Guardião da riqueza",apelido:"Edu / Dudu",match:6,match_justificativa:"Clássico, flui bem"},
+    {nome:"Filippo",sexo:"menino",origem:"italiano",significado:"Amigo dos cavalos",apelido:"Fil / Pippo",match:10,match_justificativa:"Duplo P italiano - harmonia perfeita com Gasparotto"},
+    {nome:"Alessandro",sexo:"menino",origem:"italiano",significado:"Defensor dos homens",apelido:"Alex / Ale",match:9,match_justificativa:"Nome italiano longo, equilibra bem com sobrenome"},
+    {nome:"Dario",sexo:"menino",origem:"italiano",significado:"Aquele que mantém o bem",apelido:"Dario",match:9,match_justificativa:"Italiano, curto, forte"},
+    {nome:"Enzo",sexo:"menino",origem:"italiano",significado:"Governante da casa",apelido:"Enzo",match:10,match_justificativa:"Italiano puro, perfeito com Gasparotto Frigeri"},
+    {nome:"Fabio",sexo:"menino",origem:"italiano",significado:"Cultivador de favas",apelido:"Fabi",match:8,match_justificativa:"Italiano, soa natural"},
+    {nome:"Giorgio",sexo:"menino",origem:"italiano",significado:"Agricultor, aquele que trabalha a terra",apelido:"Gio / Giorgi",match:9,match_justificativa:"Italiano clássico"},
+    {nome:"Sofia",sexo:"menina",origem:"internacional",significado:"Sabedoria",apelido:"Sofi",match:8,match_justificativa:"Universal, soa bem com Gasparotto"},
+    {nome:"Valentina",sexo:"menina",origem:"italiano",significado:"Forte e saudável",apelido:"Val / Valen",match:9,match_justificativa:"Nome italiano, combina com sobrenome italiano"},
+    {nome:"Isabella",sexo:"menina",origem:"italiano",significado:"Consagrada a Deus",apelido:"Isa / Bella",match:9,match_justificativa:"Muito italiano, harmonia excelente"},
+    {nome:"Giulia",sexo:"menina",origem:"italiano",significado:"Jovem, cheia de vida",apelido:"Giu / Ju",match:10,match_justificativa:"Italiano puro - combinação perfeita"},
+    {nome:"Emma",sexo:"menina",origem:"internacional",significado:"Universal, completa",apelido:"Emma",match:7,match_justificativa:"Moderna e elegante"},
+    {nome:"Alice",sexo:"menina",origem:"internacional",significado:"De nobre linhagem",apelido:"Ali",match:8,match_justificativa:"Simples e elegante com o sobrenome"},
+    {nome:"Laura",sexo:"menina",origem:"italiano",significado:"Coroada de louros",apelido:"Lau",match:9,match_justificativa:"Italiano clássico, soa muito bem"},
+    {nome:"Luisa",sexo:"menina",origem:"popular",significado:"Guerreira famosa",apelido:"Lu",match:8,match_justificativa:"Fluida com Gasparotto Frigeri"},
+    {nome:"Clara",sexo:"menina",origem:"popular",significado:"Clara, brilhante",apelido:"Clarinha",match:7,match_justificativa:"Clássica, funciona bem"},
+    {nome:"Helena",sexo:"menina",origem:"popular",significado:"Tocha brilhante",apelido:"Hele / Lena",match:7,match_justificativa:"Elegante, boa combinação"},
+    {nome:"Camila",sexo:"menina",origem:"popular",significado:"Assistente de rituais",apelido:"Cami",match:6,match_justificativa:"Popular brasileira"},
+    {nome:"Julia",sexo:"menina",origem:"popular",significado:"Jovem",apelido:"Ju",match:8,match_justificativa:"Muito popular, soa bem"},
+    {nome:"Cecilia",sexo:"menina",origem:"italiano",significado:"Cega para o mundo, vidente espiritual",apelido:"Ceci",match:8,match_justificativa:"Italiano, harmoniosa"},
+    {nome:"Elisa",sexo:"menina",origem:"italiano",significado:"Deus é minha abundância",apelido:"Eli",match:9,match_justificativa:"Italiana, curta, perfeita com o sobrenome"},
+    {nome:"Francesca",sexo:"menina",origem:"italiano",significado:"Livre, de origem franca",apelido:"Franca / Fran",match:10,match_justificativa:"Italiano clássico - harmonia excelente"},
+    {nome:"Giada",sexo:"menina",origem:"italiano",significado:"Jade, pedra preciosa",apelido:"Gia",match:10,match_justificativa:"Puramente italiano, combina perfeitamente"},
+    {nome:"Lucia",sexo:"menina",origem:"italiano",significado:"Luz",apelido:"Lu / Luci",match:9,match_justificativa:"Italiano, bela sonoridade com Gasparotto"},
+    {nome:"Martina",sexo:"menina",origem:"italiano",significado:"Dedicada a Marte",apelido:"Marti / Tina",match:9,match_justificativa:"Italiana, soa muito bem"},
+    {nome:"Paola",sexo:"menina",origem:"italiano",significado:"Pequena, humilde",apelido:"Pao",match:9,match_justificativa:"Italiano puro, harmonia perfeita"},
+    {nome:"Serena",sexo:"menina",origem:"italiano",significado:"Serena, tranquila",apelido:"Sere",match:8,match_justificativa:"Italiana, elegante"},
+    {nome:"Pietro",sexo:"menino",origem:"italiano",significado:"Pedra, rocha",apelido:"Pie / Pieto",match:9,match_justificativa:"Italiano puro"},
+    {nome:"Mattia",sexo:"menino",origem:"italiano",significado:"Dom de Deus",apelido:"Matt",match:10,match_justificativa:"Italiano, soa excelente"},
+    {nome:"Ciro",sexo:"menino",origem:"italiano",significado:"Trono, poder solar",apelido:"Ciro",match:8,match_justificativa:"Curto, italiano, forte"},
+    {nome:"Bruno",sexo:"menino",origem:"popular",significado:"Escuro, moreno",apelido:"Bruno",match:7,match_justificativa:"Funciona bem com o sobrenome"},
+    {nome:"Caio",sexo:"menino",origem:"brasileiro",significado:"Aquele que se alegra",apelido:"Cai",match:6,match_justificativa:"Popular brasileiro"},
+    {nome:"Diego",sexo:"menino",origem:"popular",significado:"Aquele que aprende",apelido:"Di",match:6,match_justificativa:"Popular, soa bem"},
+    {nome:"Vitor",sexo:"menino",origem:"popular",significado:"Vitorioso",apelido:"Vito / Vi",match:7,match_justificativa:"Popular no Brasil"},
+    {nome:"Heitor",sexo:"menino",origem:"popular",significado:"O que mantém firme",apelido:"Hei",match:7,match_justificativa:"Elegante, soa bem"},
+    {nome:"Arthur",sexo:"menino",origem:"popular",significado:"Urso, pedra",apelido:"Art / Artu",match:6,match_justificativa:"Um dos mais populares"},
+    {nome:"Vicente",sexo:"menino",origem:"popular",significado:"Vencedor",apelido:"Vic / Cente",match:7,match_justificativa:"Soa bem com o sobrenome"},
+    {nome:"Renato",sexo:"menino",origem:"popular",significado:"Renascido",apelido:"Re / Renato",match:7,match_justificativa:"Clássico"},
+  ];
+}
+
+function renderNames() {
+  const list = document.getElementById('names-list');
+  list.innerHTML = '';
+  document.getElementById('header-profile').textContent = `Avaliação do ${state.profile}`;
+  updateProgress();
+
+  let filtered = state.names;
+  const f = state.currentFilter;
+
+  if (f === 'menino') filtered = filtered.filter(n => n.sexo === 'menino');
+  else if (f === 'menina') filtered = filtered.filter(n => n.sexo === 'menina');
+  else if (f === 'italiano') filtered = filtered.filter(n => n.origem === 'italiano');
+  else if (f === 'brasileiro') filtered = filtered.filter(n => n.origem === 'brasileiro');
+  else if (f === 'popular') filtered = filtered.filter(n => n.origem === 'popular');
+  else if (f === 'liked') filtered = filtered.filter(n => state.votes[n.nome] === 'like');
+  else if (f === 'pending') filtered = filtered.filter(n => !state.votes[n.nome]);
+
+  if (state.sex !== 'ambos') {
+    filtered = filtered.filter(n => n.sexo === state.sex);
+  }
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>Nenhum nome encontrado para este filtro.</p></div>';
+    return;
+  }
+
+  filtered.forEach(n => {
+    const vote = state.votes[n.nome];
+    const card = document.createElement('div');
+    card.className = `name-card ${n.sexo} ${vote === 'like' ? 'liked' : vote === 'dislike' ? 'disliked' : ''}`;
+    card.id = `card-${n.nome}`;
+
+    const scoreClass = n.match >= 8 ? 'score-high' : n.match >= 5 ? 'score-mid' : 'score-low';
+    const scoreEmoji = n.match >= 8 ? '🟢' : n.match >= 5 ? '🟡' : '🔴';
+    const originClass = `origin-${n.origem}`;
+    const sexTag = `<span class="tag-sexo ${n.sexo === 'menino' ? 'tag-menino' : 'tag-menina'}">${n.sexo === 'menino' ? '💙' : '💗'}</span>`;
+
+    card.innerHTML = `
+      <div class="name-card-top">
+        <div class="name-main">
+          <div class="name-title">${n.nome} ${sexTag}</div>
+          <div class="name-nickname">Apelido: ${n.apelido}</div>
+          <span class="name-origin ${originClass}">${n.origem}</span>
+        </div>
+        <div class="match-badge">
+          <div class="match-score ${scoreClass}">${scoreEmoji} ${n.match}</div>
+          <div class="match-label">match</div>
+        </div>
+      </div>
+      <div class="name-meaning">${n.significado}</div>
+      <div class="match-hint">${n.match_justificativa}</div>
+      <div class="vote-btns">
+        <button class="vote-btn vote-dislike ${vote === 'dislike' ? 'active' : ''}" onclick="vote('${n.nome}', 'dislike')">👎</button>
+        <button class="vote-btn vote-like ${vote === 'like' ? 'active' : ''}" onclick="vote('${n.nome}', 'like')">👍</button>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function vote(nome, type) {
+  if (state.votes[nome] === type) {
+    delete state.votes[nome];
+  } else {
+    state.votes[nome] = type;
+  }
+  saveState();
+  const card = document.getElementById(`card-${nome}`);
+  if (card) {
+    card.className = `name-card ${card.className.split(' ')[1]} ${state.votes[nome] === 'like' ? 'liked' : state.votes[nome] === 'dislike' ? 'disliked' : ''}`;
+    const likeBtn = card.querySelector('.vote-like');
+    const dislikeBtn = card.querySelector('.vote-dislike');
+    likeBtn.className = `vote-btn vote-like ${state.votes[nome] === 'like' ? 'active' : ''}`;
+    dislikeBtn.className = `vote-btn vote-dislike ${state.votes[nome] === 'dislike' ? 'active' : ''}`;
+  }
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = state.sex === 'ambos' ? state.names.length : state.names.filter(n => n.sexo === state.sex).length;
+  const voted = Object.keys(state.votes).filter(nome => {
+    const n = state.names.find(x => x.nome === nome);
+    return n && (state.sex === 'ambos' || n.sexo === state.sex);
+  }).length;
+  const pct = total > 0 ? Math.round((voted/total)*100) : 0;
+  document.getElementById('header-progress').textContent = `${voted} de ${total} avaliados (${pct}%)`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function applyFilter(f) {
+  state.currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderNames();
+}
+
+function addCustomName() {
+  const input = document.getElementById('custom-name-input');
+  const sex = document.getElementById('custom-sex-select').value;
+  const nome = input.value.trim();
+  if (!nome) return;
+  if (EXCLUDED.includes(nome.toLowerCase())) {
+    alert('Este nome está na lista de excluídos!');
+    return;
+  }
+  if (state.names.find(n => n.nome.toLowerCase() === nome.toLowerCase())) {
+    alert('Este nome já está na lista!');
+    return;
+  }
+  state.names.push({ nome, sexo: sex, origem: 'personalizado', significado: 'Nome adicionado manualmente', apelido: nome.split(' ')[0], match: 7, match_justificativa: 'Nome personalizado' });
+  saveState();
+  input.value = '';
+  renderNames();
+}
+
+function refreshExport() {
+  const liked = state.names.filter(n => state.votes[n.nome] === 'like').map(n => ({ nome: n.nome, sexo: n.sexo, origem: n.origem, apelido: n.apelido, match: n.match }));
+  const exportData = { perfil: state.profile || 'Não definido', timestamp: new Date().toISOString(), likes: liked };
+  document.getElementById('my-export-json').value = JSON.stringify(exportData);
+}
+
+function copyJSON() {
+  const ta = document.getElementById('my-export-json');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(() => alert('JSON copiado! Envie para o(a) parceiro(a) 💌')).catch(() => {
+    document.execCommand('copy');
+    alert('JSON copiado!');
+  });
+}
+
+function compareResults() {
+  const raw = document.getElementById('partner-json').value.trim();
+  if (!raw) { alert('Cole o JSON do parceiro(a) primeiro!'); return; }
+  let partner;
+  try { partner = JSON.parse(raw); } catch(e) { alert('JSON inválido. Verifique e tente novamente.'); return; }
+
+  const myLikes = new Set(state.names.filter(n => state.votes[n.nome] === 'like').map(n => n.nome));
+  const partnerLikes = new Set((partner.likes || []).map(n => n.nome));
+  const matches = [...myLikes].filter(n => partnerLikes.has(n));
+  const almostMyLikes = [...myLikes].filter(n => !partnerLikes.has(n));
+  const almostPartnerLikes = [...partnerLikes].filter(n => !myLikes.has(n));
+
+  const container = document.getElementById('match-results');
+  if (matches.length === 0 && almostMyLikes.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">😅</div><p>Nenhum match ainda. Continuem avaliando!</p></div>';
+    return;
+  }
+
+  let html = '';
+  if (matches.length > 0) {
+    html += `<div class="match-section match-perfect"><h3>✅ ${matches.length} Matches perfeitos!</h3>`;
+    matches.forEach(nome => {
+      const n = state.names.find(x => x.nome === nome);
+      if (!n) return;
+      const scoreClass = n.match >= 8 ? 'score-high' : n.match >= 5 ? 'score-mid' : 'score-low';
+      html += `<div class="name-card ${n.sexo}" style="border-color:var(--green);">
+        <div class="name-card-top">
+          <div class="name-main"><div class="name-title">${n.nome}</div><div class="name-nickname">Apelido: ${n.apelido}</div></div>
+          <div class="match-badge"><div class="match-score ${scoreClass}">${n.match}/10</div><div class="match-label">match</div></div>
+        </div>
+        <div class="name-meaning">${n.significado}</div>
+      </div>`;
+    });
+    html += '</div>';
+    // Save matches for ranking
+    localStorage.setItem('babynames_matches', JSON.stringify(matches));
+    renderRanking(matches);
+  }
+
+  if (almostMyLikes.length > 0) {
+    html += `<div class="match-section match-almost"><h3>🟡 Só você curtiu (${almostMyLikes.length})</h3>`;
+    almostMyLikes.slice(0,5).forEach(nome => {
+      const n = state.names.find(x => x.nome === nome);
+      if (!n) return;
+      html += `<div class="name-card ${n.sexo}"><div class="name-title">${n.nome} <span class="name-nickname">${n.apelido}</span></div></div>`;
+    });
+    if (almostMyLikes.length > 5) html += `<p style="text-align:center; color:var(--text-muted); font-size:13px; padding:8px;">+${almostMyLikes.length-5} mais...</p>`;
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function renderRanking(matchNames) {
+  const container = document.getElementById('ranking-content');
+  if (!matchNames || matchNames.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>Compare os resultados primeiro para ver os matches!</p></div>';
+    return;
+  }
+
+  let html = '<p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Dê estrelas para ranquear os nomes que ambos curtiram:</p>';
+  matchNames.forEach(nome => {
+    const n = state.names.find(x => x.nome === nome);
+    if (!n) return;
+    const stars = state.stars[nome] || 0;
+    let starsHtml = '';
+    for (let i = 1; i <= 5; i++) {
+      starsHtml += `<span class="star ${i <= stars ? 'active' : ''}" onclick="setStar('${nome}', ${i})">⭐</span>`;
+    }
+    html += `<div class="star-card">
+      <div class="name-row"><div class="name">${n.nome} <span style="font-size:13px; color:var(--text-muted);">(${n.apelido})</span></div><span style="font-size:12px; color:var(--text-muted);">${n.sexo === 'menino' ? '💙' : '💗'}</span></div>
+      <div class="stars">${starsHtml}</div>
+    </div>`;
+  });
+
+  const ranked = matchNames.filter(n => state.stars[n]).sort((a,b) => (state.stars[b]||0) - (state.stars[a]||0));
+  if (ranked.length > 0) {
+    html += '<h3 style="font-size:16px; font-weight:700; color:var(--purple-dark); margin:24px 0 12px;">🏆 Ranking Final</h3>';
+    ranked.forEach((nome, idx) => {
+      const n = state.names.find(x => x.nome === nome);
+      if (!n) return;
+      const posClass = idx === 0 ? 'gold' : idx === 1 ? 'silver' : idx === 2 ? 'bronze' : '';
+      const posEmoji = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx+1}º`;
+      html += `<div class="rank-item">
+        <div class="rank-pos ${posClass}">${posEmoji}</div>
+        <div class="rank-name"><div class="name">${n.nome}</div><div class="nick">${n.apelido} • ${n.origem}</div></div>
+        <div class="rank-stars">${'⭐'.repeat(state.stars[nome])}</div>
+      </div>`;
+    });
+  }
+
+  container.innerHTML = html;
+}
+
+function setStar(nome, val) {
+  state.stars[nome] = val;
+  saveState();
+  const saved = localStorage.getItem('babynames_matches');
+  const matches = saved ? JSON.parse(saved) : [];
+  renderRanking(matches);
+}
+
+function switchTab(tab) {
+  ['export','compare','ranking'].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+    document.getElementById(`tab-content-${t}`).style.display = t === tab ? 'block' : 'none';
+  });
+  if (tab === 'export') refreshExport();
+  if (tab === 'ranking') {
+    const saved = localStorage.getItem('babynames_matches');
+    renderRanking(saved ? JSON.parse(saved) : []);
+  }
+}
+
+// Init
+loadState();
+</script>
+</body>
+</html>
