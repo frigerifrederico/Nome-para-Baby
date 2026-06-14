@@ -115,28 +115,28 @@
     <p>Escolham juntos o nome perfeito! Cada um avalia separadamente e depois comparam os resultados.</p>
     <p class="section-title">Quem está avaliando?</p>
     <div class="profile-cards">
-      <div class="profile-card" onclick="selectProfile('Pai')" id="card-pai">
+      <div class="profile-card" id="card-pai">
         <div class="icon">👨</div><div class="label">Pai</div>
       </div>
-      <div class="profile-card" onclick="selectProfile('Mae')" id="card-mae">
+      <div class="profile-card" id="card-mae">
         <div class="icon">👩</div><div class="label">Mãe</div>
       </div>
     </div>
     <p class="section-title">Quais nomes ver?</p>
     <div class="sex-cards">
-      <div class="sex-card boy" onclick="selectSex('menino')" id="card-menino">
+      <div class="sex-card boy" id="card-menino">
         <div class="icon">💙</div><div class="label">Menino</div>
       </div>
-      <div class="sex-card girl" onclick="selectSex('menina')" id="card-menina">
+      <div class="sex-card girl" id="card-menina">
         <div class="icon">💗</div><div class="label">Menina</div>
       </div>
-      <div class="sex-card both" onclick="selectSex('ambos')" id="card-ambos">
+      <div class="sex-card both" id="card-ambos">
         <div class="icon">✨</div><div class="label">Ambos</div>
       </div>
     </div>
-    <button class="btn btn-primary" id="btn-start" onclick="startApp()" disabled>Começar a avaliar ➜</button>
+    <button class="btn btn-primary" id="btn-start" disabled>Começar a avaliar ➜</button>
     <br>
-    <button class="btn btn-outline" onclick="showScreen('screen-compare')" style="margin-top:8px">📊 Comparar resultados</button>
+    <button class="btn btn-outline" id="btn-compare" style="margin-top:8px">📊 Comparar resultados</button>
     <p style="font-size:11px; color:#9E9E9E; margin-top:16px;">191 nomes • italianos, brasileiros e populares</p>
   </div>
 </div>
@@ -274,34 +274,93 @@ function getFilteredNames() {
 }
 
 function renderNames() {
-  document.getElementById('header-profile').textContent = 'Avaliação do ' + state.profile;
+  document.getElementById('header-profile').textContent = 'Avaliação do ' + (state.profile==='Mae'?'Mãe':state.profile);
   updateProgress();
   updateStats();
   const list = document.getElementById('names-list');
   list.innerHTML = '';
   const filtered = getFilteredNames();
   if (filtered.length===0) {
-    list.innerHTML = '<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">🔍</div><p>Nenhum nome encontrado.</p></div>';
+    list.innerHTML = '<div class=\"empty-state\"><div style=\"font-size:48px;margin-bottom:12px;\">🔍</div><p>Nenhum nome encontrado.</p></div>';
     return;
   }
   const frag = document.createDocumentFragment();
-  filtered.forEach(n => {
+  filtered.forEach(function(n) {
     const vote = state.votes[n.nome];
-    const div = document.createElement('div');
-    div.className = 'name-card ' + n.sexo + (vote==='like' ? ' liked' : vote==='dislike' ? ' disliked' : '');
-    div.id = 'nc-' + n.nome.replace(/[^a-zA-Z]/g,'_');
+    const card = document.createElement('div');
+    card.className = 'name-card ' + n.sexo + (vote==='like' ? ' liked' : vote==='dislike' ? ' disliked' : '');
+    card.id = 'nc-' + n.nome.replace(/[^a-zA-Z0-9]/g,'_');
     const sc = n.match>=8 ? 'score-high' : n.match>=5 ? 'score-mid' : 'score-low';
     const em = n.match>=8 ? '🟢' : n.match>=5 ? '🟡' : '🔴';
-    const oc = 'origin-' + n.origem;
-    const st = n.sexo==='menino' ? '<span class="tag-sexo tag-menino">💙 menino</span>' : '<span class="tag-sexo tag-menina">💗 menina</span>';
-    const nm = n.nome.replace(/'/g,"\'");
-    div.innerHTML = '<div class="name-card-top"><div class="name-main"><div class="name-title">' + n.nome + ' ' + st + '</div><div class="name-nickname">Apelido: ' + n.apelido + '</div><span class="name-origin ' + oc + '">' + n.origem + '</span></div><div class="match-badge"><div class="match-score ' + sc + '">' + em + ' ' + n.match + '</div><div class="match-label">match</div></div></div><div class="name-meaning">' + n.significado + '</div><div class="match-hint">' + n.match_justificativa + '</div><div class="vote-btns"><button class="vote-btn vote-dislike' + (vote==='dislike'?' active':'') + '" onclick="vote('' + nm + '','dislike')">👎</button><button class="vote-btn vote-like' + (vote==='like'?' active':'') + '" onclick="vote('' + nm + '','like')">👍</button></div>';
-    frag.appendChild(div);
+    const safeNome = n.nome.replace(/\\/g,'').replace(/"/g,'').replace(/'/g,'');
+
+    const top = document.createElement('div');
+    top.className = 'name-card-top';
+
+    const main = document.createElement('div');
+    main.className = 'name-main';
+
+    const title = document.createElement('div');
+    title.className = 'name-title';
+    title.textContent = n.nome + ' ';
+    const tag = document.createElement('span');
+    tag.className = 'tag-sexo ' + (n.sexo==='menino' ? 'tag-menino' : 'tag-menina');
+    tag.textContent = n.sexo==='menino' ? '💙 menino' : '💗 menina';
+    title.appendChild(tag);
+
+    const nick = document.createElement('div');
+    nick.className = 'name-nickname';
+    nick.textContent = 'Apelido: ' + n.apelido;
+
+    const orig = document.createElement('span');
+    orig.className = 'name-origin origin-' + n.origem;
+    orig.textContent = n.origem;
+
+    main.appendChild(title);
+    main.appendChild(nick);
+    main.appendChild(orig);
+
+    const badge = document.createElement('div');
+    badge.className = 'match-badge';
+    badge.innerHTML = '<div class=\"match-score ' + sc + '\">' + em + ' ' + n.match + '</div><div class=\"match-label\">match</div>';
+
+    top.appendChild(main);
+    top.appendChild(badge);
+
+    const meaning = document.createElement('div');
+    meaning.className = 'name-meaning';
+    meaning.textContent = n.significado;
+
+    const hint = document.createElement('div');
+    hint.className = 'match-hint';
+    hint.textContent = n.match_justificativa;
+
+    const btns = document.createElement('div');
+    btns.className = 'vote-btns';
+
+    const disBtn = document.createElement('button');
+    disBtn.className = 'vote-btn vote-dislike' + (vote==='dislike' ? ' active' : '');
+    disBtn.textContent = '👎';
+    disBtn.onclick = function() { vote_name(n.nome, 'dislike'); };
+
+    const likeBtn = document.createElement('button');
+    likeBtn.className = 'vote-btn vote-like' + (vote==='like' ? ' active' : '');
+    likeBtn.textContent = '👍';
+    likeBtn.onclick = function() { vote_name(n.nome, 'like'); };
+
+    btns.appendChild(disBtn);
+    btns.appendChild(likeBtn);
+
+    card.appendChild(top);
+    card.appendChild(meaning);
+    card.appendChild(hint);
+    card.appendChild(btns);
+    frag.appendChild(card);
   });
   list.appendChild(frag);
 }
 
-function vote(nome, type) {
+function vote_name(nome, type) {
   state.votes[nome] = state.votes[nome]===type ? undefined : type;
   if (!state.votes[nome]) delete state.votes[nome];
   saveState();
@@ -454,6 +513,15 @@ function switchTab(tab) {
 }
 
 loadState();
+
+// Attach all event listeners safely after DOM+JS are ready
+document.getElementById('card-pai').addEventListener('click', function(){ selectProfile('Pai'); });
+document.getElementById('card-mae').addEventListener('click', function(){ selectProfile('Mae'); });
+document.getElementById('card-menino').addEventListener('click', function(){ selectSex('menino'); });
+document.getElementById('card-menina').addEventListener('click', function(){ selectSex('menina'); });
+document.getElementById('card-ambos').addEventListener('click', function(){ selectSex('ambos'); });
+document.getElementById('btn-start').addEventListener('click', function(){ startApp(); });
+document.getElementById('btn-compare').addEventListener('click', function(){ showScreen('screen-compare'); });
 </script>
 </body>
 </html>
